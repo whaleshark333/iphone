@@ -1,0 +1,376 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Phone Lock Screen Simulation</title>
+    <style>
+        body {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            background-color: #fff;
+            font-family: Arial, sans-serif;
+            margin: 0;
+        }
+        .iphone {
+            width: 300px;
+            height: 600px;
+            border-radius: 40px;
+            border: 16px solid #000;
+            background-color: #fff;
+            position: relative;
+            overflow: hidden;
+        }
+        .iphone:before {
+            content: '';
+            display: block;
+            width: 60px;
+            height: 5px;
+            background-color: #ccc;
+            border-radius: 10px;
+            position: absolute;
+            top: 10px;
+            left: 50%;
+            transform: translateX(-50%);
+        }
+        .screen {
+            width: 100%;
+            height: 100%;
+            background-color: #666;
+            color: #fff;
+            position: absolute;
+            top: 0;
+            left: 0;
+            overflow: hidden;
+        }
+        .click-to-open {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100%;
+            cursor: pointer;
+            font-size: 24px;
+            background-color: #fff;
+            color: #000;
+        }
+        .passcode-screen, .home-screen, .chat-screen, .locked-screen {
+            display: none;
+            flex-direction: column;
+            align-items: center;
+            padding: 20px;
+            height: 100%;
+            overflow: hidden;
+        }
+        .passcode-screen h2 {
+            margin-bottom: 20px;
+        }
+        .passcode-screen input {
+            padding: 10px;
+            border: 2px solid #555;
+            border-radius: 5px;
+            font-size: 18px;
+            text-align: center;
+            margin-bottom: 10px;
+            background-color: #222;
+            color: #fff;
+        }
+        .passcode-screen button {
+            padding: 10px 20px;
+            font-size: 16px;
+            background-color: #007bff;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+        .passcode-screen button:hover {
+            background-color: #0056b3;
+        }
+        #feedback {
+            color: red;
+            background-color: #f0f0f0;
+            padding: 5px;
+            border-radius: 5px;
+            margin-top: 10px;
+        }
+        #attempts {
+            color: red;
+            background-color: #f0f0f0;
+            padding: 5px;
+            border-radius: 5px;
+            margin-top: 10px;
+            display: none;
+        }
+        .home-screen ul {
+            list-style: none;
+            padding: 0;
+            width: 100%;
+            overflow-y: auto;
+            flex-grow: 1;
+        }
+        .home-screen li {
+            padding: 15px;
+            border-bottom: 1px solid #333;
+            cursor: pointer;
+            font-size: 18px;
+            color: black;
+        }
+        .home-screen li:hover {
+            background-color: #222;
+            color: white;
+        }
+        .chat-screen .messages {
+            flex-grow: 1;
+            overflow-y: auto;
+            width: 100%;
+        }
+        .message {
+            margin: 10px;
+            padding: 10px;
+            background-color: #fff;
+            color: #000;
+            border-radius: 10px;
+            max-width: 80%;
+        }
+        .message.sent {
+            align-self: flex-end;
+            background-color: #0b93f6;
+            color: #fff;
+        }
+        .chat-screen .back-button {
+            padding: 10px 20px;
+            font-size: 16px;
+            background-color: #555;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            margin-bottom: 10px;
+            align-self: flex-start;
+        }
+        .chat-screen .back-button:hover {
+            background-color: #333;
+        }
+        .power-button {
+            position: absolute;
+            top: 10px;
+            left: 10px;
+            cursor: pointer;
+            font-size: 24px;
+            color: black;
+        }
+        .bottom-text-box {
+            position: absolute;
+            bottom: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            font-size: 18px;
+            font-weight: bold;
+            color: #000;
+            background-color: #eee;
+            padding: 5px 10px;
+            border-radius: 10px;
+        }
+        .locked-screen {
+            justify-content: center;
+            align-items: center;
+            color: red;
+            text-align: center;
+            background-color: #333;
+        }
+
+        /* New Clock with Red Dot */
+        .new-clock {
+            width: 80px;
+            height: 80px;
+            border: 2px solid #fff;
+            border-radius: 50%;
+            position: relative;
+            margin-top: 20px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+.new-clock .red-dot {
+    width: 10px;
+    height: 10px;
+    background-color: red;
+    border-radius: 50%;
+    position: absolute;
+    top: 0;
+    left: 44%; /* Move the dot slightly to the left */
+    transform-origin: 50% 40px;
+    animation: rotateRedDot 5s linear infinite;
+}
+
+@keyframes rotateRedDot {
+    0% {
+        transform: rotate(0deg) translateX(0);
+    }
+    100% {
+        transform: rotate(360deg) translateX(0);
+    }
+}
+
+
+        .profile-icon {
+            width: 50px;
+            height: 50px;
+            background-color: #ccc;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-bottom: 10px;
+        }
+        .profile-icon::before {
+            content: "👤";
+            font-size: 24px;
+        }
+        .centered {
+            text-align: center;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="iphone">
+        <div class="screen">
+
+            <!-- Initial Screen -->
+            <div class="click-to-open" id="initial-screen">
+                Click the screen to open
+            </div>
+
+            <!-- Passcode Screen -->
+            <div class="passcode-screen" id="passcode-screen">
+                <div class="power-button" onclick="shutdownPhone()">⏻</div>
+                <div class="profile-icon"></div>
+                <h2>Emily</h2>
+                <h2>Enter Passcode</h2>
+                <input type="password" id="passwordInput" placeholder="••••••" />
+                <button onclick="checkPassword()">Unlock</button>
+                <p id="feedback"></p>
+                <p id="attempts"></p>
+            </div>
+
+            <!-- Home Screen -->
+            <div class="home-screen" id="home-screen">
+                <div class="power-button" onclick="shutdownPhone()">⏻</div>
+                <h2>Messages</h2>
+                <ul>
+                    <li onclick="openChat('Mum')">Mum</li>
+                    <li onclick="openChat('Jessica')">Jessica</li>
+                    <li onclick="openChat('Mark')">Mark</li>
+                    <li onclick="openChat('Stalker')">Stalker</li>
+                    <li onclick="openChat('Third Bestie')">Third Bestie</li>
+                </ul>
+            </div>
+
+            <!-- Chat Screen -->
+            <div class="chat-screen" id="chat-screen">
+                <button class="back-button" onclick="goBackToHome()">Back</button>
+                <h2 id="chat-name"></h2>
+                <div class="messages" id="messages"></div>
+            </div>
+
+            <!-- Locked Screen -->
+            <div class="locked-screen" id="locked-screen">
+                <h2>Try again after 5 minutes</h2>
+                <div class="new-clock">
+                    <div class="red-dot"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let attemptsLeft = 10;
+
+        // Initial Screen Click
+        document.getElementById('initial-screen').addEventListener('click', function() {
+            document.getElementById('initial-screen').style.display = 'none';
+            document.getElementById('passcode-screen').style.display = 'flex';
+            resetPasswordInput();
+        });
+
+        // Check Password
+        function checkPassword() {
+            const input = document.getElementById('passwordInput').value;
+            if (input === 'mark') {
+                document.getElementById('passcode-screen').style.display = 'none';
+                document.getElementById('home-screen').style.display = 'flex';
+                resetPasswordInput();
+            } else {
+                attemptsLeft--;
+                document.getElementById('feedback').textContent = 'Incorrect Password';
+                document.getElementById('attempts').textContent = attemptsLeft + ' attempts remaining';
+                document.getElementById('attempts').style.display = 'block';
+                if (attemptsLeft === 0) {
+                    document.getElementById('passcode-screen').style.display = 'none';
+                    document.getElementById('locked-screen').style.display = 'flex';
+                    setTimeout(() => {
+                        resetPhone();
+                    }, 5000);  // Lockout period for 5 seconds
+                }
+            }
+        }
+
+        // Reset Password Input
+        function resetPasswordInput() {
+            document.getElementById('passwordInput').value = '';
+            document.getElementById('feedback').textContent = '';
+            document.getElementById('attempts').style.display = 'none';
+        }
+
+        // Go Back to Home
+        function goBackToHome() {
+            document.getElementById('chat-screen').style.display = 'none';
+            document.getElementById('home-screen').style.display = 'flex';
+        }
+
+        // Open Chat
+        function openChat(name) {
+            document.getElementById('home-screen').style.display = 'none';
+            document.getElementById('chat-screen').style.display = 'flex';
+            document.getElementById('chat-name').textContent = name;
+            loadMessages(name);
+        }
+
+        // Load Messages
+        function loadMessages(name) {
+            const messagesDiv = document.getElementById('messages');
+            messagesDiv.innerHTML = '';
+            const messages = [
+                { sender: 'You', text: 'Hey ' + name + ', how are you?', sent: true },
+                { sender: name, text: 'I\'m good! How about you?', sent: false }
+            ];
+
+            messages.forEach(message => {
+                const msgDiv = document.createElement('div');
+                msgDiv.classList.add('message');
+                if (message.sent) msgDiv.classList.add('sent');
+                msgDiv.textContent = message.text;
+                messagesDiv.appendChild(msgDiv);
+            });
+        }
+
+        // Shutdown Phone
+        function shutdownPhone() {
+            resetPhone();
+        }
+
+        // Reset Phone
+        function resetPhone() {
+            document.getElementById('initial-screen').style.display = 'flex';
+            document.getElementById('passcode-screen').style.display = 'none';
+            document.getElementById('home-screen').style.display = 'none';
+            document.getElementById('chat-screen').style.display = 'none';
+            document.getElementById('locked-screen').style.display = 'none';
+            resetPasswordInput();
+            attemptsLeft = 10;
+        }
+    </script>
+</body>
+</html>
