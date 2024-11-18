@@ -1,0 +1,603 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Phone Lock Screen Simulation</title>
+    <style>
+        body {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            background-color: #fff;
+            font-family: Arial, sans-serif;
+            margin: 0;
+        }
+.chat-container {
+    overflow-y: auto;
+    padding: 10px;
+    /* Ensures a small gap at the end of the conversation for the input */
+    padding-bottom: 70px;
+}
+
+.message-bubble {
+    /* Your existing message bubble styles */
+    margin-bottom: 10px;
+}
+
+.message-input {
+    display: flex;
+    align-items: center;
+    padding: 10px;
+    background-color: #333;
+    border-radius: 10px;
+    margin-top: 20px;
+    gap: 10px;
+    position: sticky; /* Keeps it in view when scrolling */
+    bottom: 40px; /* Adjusts position to be visible */
+}
+
+}
+
+.message-placeholder {
+    color: #aaa;
+    font-size: 14px;
+    flex-grow: 1;
+}
+
+.message-icons {
+    display: flex;
+    gap: 10px;
+}
+
+.icon {
+    width: 20px;
+    height: 20px;
+    filter: invert(1); /* Makes icons white for dark background */
+}
+
+        .iphone {
+            width: 300px;
+            height: 600px;
+            border-radius: 40px;
+            border: 16px solid #000;
+            background-color: #fff;
+            position: relative;
+            overflow: hidden;
+        }
+        .iphone:before {
+            content: '';
+            display: block;
+            width: 60px;
+            height: 5px;
+            background-color: #ccc;
+            border-radius: 10px;
+            position: absolute;
+            top: 10px;
+            left: 50%;
+            transform: translateX(-50%);
+        }
+        .screen {
+            width: 100%;
+            height: 100%;
+            background-color: #666;
+            color: #fff;
+            position: absolute;
+            top: 0;
+            left: 0;
+            overflow: hidden;
+        }
+        .click-to-open {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100%;
+            cursor: pointer;
+            font-size: 24px;
+            background-color: #fff;
+            color: #000;
+        }
+        .passcode-screen, .home-screen, .chat-screen, .locked-screen {
+            display: none;
+            flex-direction: column;
+            align-items: center;
+            padding: 20px;
+            height: 100%;
+            overflow: hidden;
+        }
+        .passcode-screen h2 {
+            margin-bottom: 20px;
+        }
+        .passcode-screen input {
+            padding: 10px;
+            border: 2px solid #555;
+            border-radius: 5px;
+            font-size: 18px;
+            text-align: center;
+            margin-bottom: 10px;
+            background-color: #222;
+            color: #fff;
+        }
+        .passcode-screen button {
+            padding: 10px 20px;
+            font-size: 16px;
+            background-color: #007bff;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+.dots {
+    display: flex;
+    gap: 10px;
+    margin-bottom: 20px;
+}
+
+.dot {
+    width: 15px;
+    height: 15px;
+    background-color: #555;
+    border-radius: 50%;
+    border: 1px solid #333;
+}
+
+.dot.filled {
+    background-color: #0b93f6;
+}
+
+.number-pad {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 10px;
+    width: 150px;
+}
+
+.number-pad button {
+    padding: 10px;
+    font-size: 18px;
+    background-color: #222;
+    color: white;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+}
+
+.number-pad button:hover {
+    background-color: #0b93f6;
+}
+
+        .passcode-screen button:hover {
+            background-color: #0056b3;
+        }
+        #feedback {
+            color: red;
+            background-color: #f0f0f0;
+            padding: 5px;
+            border-radius: 5px;
+            margin-top: 10px;
+        }
+        #attempts {
+            color: red;
+            background-color: #f0f0f0;
+            padding: 5px;
+            border-radius: 5px;
+            margin-top: 10px;
+            display: none;
+        }
+        .home-screen ul {
+            list-style: none;
+            padding: 0;
+            width: 100%;
+            overflow-y: auto;
+            flex-grow: 1;
+        }
+        .home-screen li {
+            padding: 15px;
+            border-bottom: 1px solid #333;
+            cursor: pointer;
+            font-size: 18px;
+            color: black;
+        }
+        .home-screen li:hover {
+            background-color: #222;
+            color: white;
+        }
+        .chat-screen .messages {
+            flex-grow: 1;
+            overflow-y: auto;
+            width: 100%;
+        }
+        .message {
+            margin: 10px;
+            padding: 10px;
+            background-color: #fff;
+            color: #000;
+            border-radius: 10px;
+            max-width: 80%;
+        }
+        .message.sent {
+            align-self: flex-end;
+            background-color: #0b93f6;
+            color: #fff;
+        }
+        .message-date {
+            font-size: 0.8em;
+            color: #888;
+            text-align: center;
+            margin: 5px 0;
+        }
+        .chat-screen .back-button {
+            padding: 10px 20px;
+            font-size: 16px;
+            background-color: #555;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            margin-bottom: 10px;
+            align-self: flex-start;
+        }
+        .chat-screen .back-button:hover {
+            background-color: #333;
+        }
+        .power-button {
+            position: absolute;
+            top: 10px;
+            left: 10px;
+            cursor: pointer;
+            font-size: 24px;
+            color: black;
+        }
+        .bottom-text-box {
+            position: absolute;
+            bottom: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            font-size: 18px;
+            font-weight: bold;
+            color: #000;
+            background-color: #eee;
+            padding: 5px 10px;
+            border-radius: 10px;
+        }
+        .locked-screen {
+            justify-content: center;
+            align-items: center;
+            color: red;
+            text-align: center;
+            background-color: #333;
+        }
+        /* New Clock with Red Dot */
+        .new-clock {
+            width: 80px;
+            height: 80px;
+            border: 2px solid #fff;
+            border-radius: 50%;
+            position: relative;
+            margin-top: 20px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+        .new-clock .red-dot {
+            width: 10px;
+            height: 10px;
+            background-color: red;
+            border-radius: 50%;
+            position: absolute;
+            top: 0;
+            left: 44%;
+            transform-origin: 50% 40px;
+            animation: rotateRedDot 5s linear infinite;
+        }
+        @keyframes rotateRedDot {
+            0% { transform: rotate(0deg) translateX(0); }
+            100% { transform: rotate(360deg) translateX(0); }
+        }
+        .profile-icon {
+            width: 50px;
+            height: 50px;
+            background-color: #ccc;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-bottom: 10px;
+        }
+        .profile-icon::before {
+            content: "👤";
+            font-size: 24px;
+        }
+        .centered {
+            text-align: center;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="iphone">
+        <div class="screen">
+            <!-- Initial Screen -->
+            <div class="click-to-open" id="initial-screen">
+                Click the screen to open
+            </div>
+
+            <!-- Passcode Screen -->
+           <div class="passcode-screen" id="passcode-screen">
+    <div class="power-button" onclick="shutdownPhone()">⏻</div>
+    <div class="profile-icon"></div>
+    <h2>Emily</h2>
+    <h2>Enter Passcode</h2>
+    <div class="dots">
+        <span class="dot" id="dot1"></span>
+        <span class="dot" id="dot2"></span>
+        <span class="dot" id="dot3"></span>
+        <span class="dot" id="dot4"></span>
+    </div>
+    <div class="number-pad">
+        <button onclick="enterDigit(1)">1</button>
+        <button onclick="enterDigit(2)">2</button>
+        <button onclick="enterDigit(3)">3</button>
+        <button onclick="enterDigit(4)">4</button>
+        <button onclick="enterDigit(5)">5</button>
+        <button onclick="enterDigit(6)">6</button>
+        <button onclick="enterDigit(7)">7</button>
+        <button onclick="enterDigit(8)">8</button>
+        <button onclick="enterDigit(9)">9</button>
+        <button onclick="clearPasscode()">C</button>
+        <button onclick="enterDigit(0)">0</button>
+        <button onclick="checkPassword()">✓</button>
+    </div>
+    <p id="feedback"></p>
+    <p id="attempts"></p>
+</div>
+
+            <!-- Home Screen -->
+            <div class="home-screen" id="home-screen">
+                <div class="power-button" onclick="shutdownPhone()">⏻</div>
+                <h2>Messages</h2>
+                <ul>
+                    <li onclick="openChat('Mum')">Mum</li>
+                    <li onclick="openChat('Jessica')">Jessica</li>
+                    <li onclick="openChat('Mark')">Mark</li>
+                    <li onclick="openChat('Unknown (maybe Frank)')">Unknown (maybe Frank)</li>
+                    <li onclick="openChat('Emilia')">Emilia</li>
+                </ul>
+            </div>
+
+            <!-- Chat Screen -->
+            <div class="chat-screen" id="chat-screen">
+                <button class="back-button" onclick="goBackToHome()">Back</button>
+                <h2 id="chat-name"></h2>
+                <div class="messages" id="messages">
+                    <!-- Messages will be displayed here for each contact -->
+                </div>
+
+<div class="message-input">
+    <span class="message-placeholder">Message...</span>
+    <div class="message-icons">
+        <img src="camera_icon.png" alt="Camera" class="icon">
+        <img src="sticker_icon.png" alt="Sticker" class="icon">
+        <img src="picture_icon.png" alt="Picture" class="icon">
+        <img src="microphone_icon.png" alt="Microphone" class="icon">
+    </div>
+</div>
+
+</div>
+            </div>
+
+            <!-- Locked Screen -->
+            <div class="locked-screen" id="locked-screen">
+                <h2>Try again after 5 minutes</h2>
+                <div class="new-clock">
+                    <div class="red-dot"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let attemptsLeft = 10;
+
+        // Initial Screen Click
+        document.getElementById('initial-screen').addEventListener('click', function() {
+            document.getElementById('initial-screen').style.display = 'none';
+            document.getElementById('passcode-screen').style.display = 'flex';
+            resetPasswordInput();
+        });
+
+        // Check Password
+        let enteredPasscode = [];
+const correctPasscode = [0, 5, 0, 8];
+
+function enterDigit(digit) {
+    if (enteredPasscode.length < 4) {
+        enteredPasscode.push(digit);
+        updateDots();
+    }
+}
+
+function updateDots() {
+    for (let i = 0; i < 4; i++) {
+        const dot = document.getElementById(`dot${i + 1}`);
+        if (i < enteredPasscode.length) {
+            dot.classList.add('filled');
+        } else {
+            dot.classList.remove('filled');
+        }
+    }
+}
+
+function clearPasscode() {
+    enteredPasscode = [];
+    updateDots();
+}
+
+function checkPassword() {
+    if (JSON.stringify(enteredPasscode) === JSON.stringify(correctPasscode)) {
+        document.getElementById('passcode-screen').style.display = 'none';
+        document.getElementById('home-screen').style.display = 'flex';
+        attemptsLeft = 10;
+        clearPasscode();
+    } else {
+        attemptsLeft--;
+        document.getElementById('feedback').textContent = 'Incorrect passcode';
+        document.getElementById('attempts').textContent = `${attemptsLeft} attempts remaining`;
+        document.getElementById('attempts').style.display = attemptsLeft < 10 ? 'block' : 'none';
+        clearPasscode();
+        if (attemptsLeft === 0) {
+            lockPhone();
+        }
+    }
+}
+
+
+        // Reset Password Input
+        function resetPasswordInput() {
+            document.getElementById('passwordInput').value = '';
+            document.getElementById('feedback').textContent = '';
+            document.getElementById('attempts').textContent = '';
+            document.getElementById('attempts').style.display = 'none';
+        }
+
+        // Lock Phone
+        function lockPhone() {
+            document.getElementById('passcode-screen').style.display = 'none';
+            document.getElementById('locked-screen').style.display = 'flex';
+            attemptsLeft = 10; // Reset attempts after 5 minutes
+            setTimeout(() => {
+                document.getElementById('locked-screen').style.display = 'none';
+                document.getElementById('initial-screen').style.display = 'flex';
+            }, 5000); // 5 seconds in milliseconds
+        }
+
+        // Shutdown Phone
+        function shutdownPhone() {
+            document.getElementById('home-screen').style.display = 'none';
+            document.getElementById('chat-screen').style.display = 'none';
+            document.getElementById('passcode-screen').style.display = 'none';
+            document.getElementById('locked-screen').style.display = 'none';
+            document.getElementById('initial-screen').style.display = 'flex';
+            resetPasswordInput();
+        }
+
+        // Open Chat
+        function openChat(contactName) {
+            document.getElementById('home-screen').style.display = 'none';
+            document.getElementById('chat-screen').style.display = 'flex';
+            document.getElementById('chat-name').textContent = contactName;
+            displayConversation(contactName);
+        }
+
+        // Display Hardcoded Messages for Each Contact
+        function displayConversation(contactName) {
+            const messagesContainer = document.getElementById('messages');
+            messagesContainer.innerHTML = '';
+            const conversations = {
+    'Emilia': [
+        { text: "So, did you get another designer bag? Must be nice to shop like that.", date: "Sep 16, 2024", type: "received" },
+        { text: "Yeah, I found one I really liked. It’s just a bag, though.", date: "Sep 16, 2024", type: "sent" },
+        { text: "Right, just a bag. I guess it’s easy to say that when you can afford it.", date: "Sep 16, 2024", type: "received" },
+        { text: "I didn’t mean to brag. It was on sale!", date: "Sep 16, 2024", type: "sent" },
+        { text: "Oh, sales must be a relief when you can just splurge.", date: "Sep 16, 2024", type: "received" },
+        { text: "I work for my money, too. It’s not like it just appears.", date: "Sep 16, 2024", type: "sent" },
+        { text: "Of course, but some of us have to save up for ages for what you buy without thinking.", date: "Sep 16, 2024", type: "received" },
+        { text: "I get that, but I still want to enjoy what I have.", date: "Sep 16, 2024", type: "sent" },
+        { text: "Sure, enjoy it. Just don’t forget about the rest of us who can’t keep up.", date: "Sep 16, 2024", type: "received" },
+        { text: "Hey, Amelia. I just wanted to check in. I heard things have been tough with your family lately.", date: "Sep 17, 2024", type: "sent" },
+        { text: "Yeah, well, you wouldn’t really understand, would you?", date: "Sep 17, 2024", type: "received" },
+        { text: "I just wanted to see if you’re okay. I care about you.", date: "Sep 17, 2024", type: "sent" },
+        { text: "Caring doesn’t change the fact that you have no idea what it’s like to struggle.", date: "Sep 17, 2024", type: "received" },
+        { text: "I get that I have a different life, but I still want to support you.", date: "Sep 17, 2024", type: "sent" },
+        { text: "Support? You mean pity? You can’t really relate to any of this.", date: "Sep 17, 2024", type: "received" },
+        { text: "I’m not trying to pity you! I just want to help if I can.", date: "Sep 17, 2024", type: "sent" },
+        { text: "Help? By reminding me how easy you have it?", date: "Sep 17, 2024", type: "received" },
+        { text: "That’s not what I meant! I’m here for you if you want to talk.", date: "Sep 17, 2024", type: "sent" },
+        { text: "Yeah, sure. Just remember, you’ll never get it.", date: "Sep 17, 2024", type: "received" }
+    ],
+
+    'Unknown (maybe Frank)': [
+        { text: "Hey Emily, I saw you at the café today. You looked really happy.", date: "Sep 16, 2024", type: "received" },
+        { text: "I know you love that pink sweater. You wear it often.", date: "Sep 16, 2024", type: "received" },
+        { text: "I’ve been thinking about you a lot lately. Can’t get you out of my head.", date: "Sep 16, 2024", type: "received" },
+        { text: "I noticed you talking to Mark the other day. You two looked close.", date: "Sep 16, 2024", type: "received" },
+        { text: "I hope you’re safe. I’ll always be watching out for you.", date: "Sep 16, 2024", type: "received" },
+        { text: "I saw you at the park yesterday. You were smiling. It made my day.", date: "Sep 17, 2024", type: "received" },
+        { text: "I noticed you were reading that book you love. I’ve read it too.", date: "Sep 17, 2024", type: "received" },
+        { text: "You were with Jessica last week. I hope she’s treating you well.", date: "Sep 17, 2024", type: "received" },
+        { text: "I know what your favorite coffee order is. I saw you get it last week.", date: "Sep 17, 2024", type: "received" },
+        { text: "I’ve been thinking about how much I care about you. You deserve to be happy.", date: "Sep 17, 2024", type: "received" }
+    ],
+    'Mark': [
+        { text: "Hey, I miss you! When can we see each other?", date: "Sep 16, 2024", type: "sent" },
+        { text: "Hey! Miss you too. It’s been a while. 😅", date: "Sep 16, 2024", type: "received" },
+        { text: "feels like ages since we’ve had time together.", date: "Sep 16, 2024", type: "sent" },
+        { text: "Yeah.. Jessica’s been around a lot lately, making it tough.", date: "Sep 16, 2024", type: "received" },
+        { text: "Maybe we could sneak in some time this weekend? Just us?", date: "Sep 16, 2024", type: "sent" },
+        { text: "I’d love that. Let me see what I can do.", date: "Sep 16, 2024", type: "received" },
+        { text: "Sounds good! can’t wait to see you! ❤️", date: "Sep 16, 2024", type: "sent" },
+        { text: "Me too! ❤️", date: "Sep 16, 2024", type: "received" },
+        { text: "Hey Emily, could you meet me at the beach later? xx", date: "Sep 17, 2024", type: "received" },
+        { text: "Sure, what time?", date: "Sep 17, 2024", type: "sent" },
+        { text: "8:30PM? xx", date: "Sep 17, 2024", type: "received" },
+        { text: "Okay I’ll be there!", date: "Sep 17, 2024", type: "sent" }
+    ],
+    'Jessica': [
+        { text: "Hey Jess, are we good? I feel like you've been a bit distant lately.", date: "Sep 16, 2024", type: "sent" },
+        { text: "Hey, yeah we’re fine! Why do you ask? xx", date: "Sep 16, 2024", type: "received" },
+        { text: "I don’t know, you just seem kind of off. Just wanted to make sure I didn’t do anything wrong.", date: "Sep 16, 2024", type: "sent" },
+        { text: "No, you haven’t done anything, don’t worry! I’ve just had a lot on my mind lately. xx", date: "Sep 16, 2024", type: "received" },
+        { text: "Okay, just checking in. You know I’m always here if you want to talk, right?", date: "Sep 16, 2024", type: "sent" },
+        { text: "Thanks, Em. I appreciate it. I’m good though, promise. xx", date: "Sep 16, 2024", type: "received" },
+        { text: "Alright, let me know if anything’s up.", date: "Sep 16, 2024", type: "sent" },
+        { text: "Will do! xx", date: "Sep 16, 2024", type: "received" },
+        { text: "Hey, I’m throwing a birthday thing for Mark this Saturday. You free to come? xx", date: "Sep 17, 2024", type: "received" },
+        { text: "Oh, you’re doing something for him? That’s nice.", date: "Sep 17, 2024", type: "sent" },
+        { text: "Yeah, just something low-key at my place. Thought it’d be good to get together. xx", date: "Sep 17, 2024", type: "received" },
+        { text: "Sounds cool. I should be able to make it.", date: "Sep 17, 2024", type: "sent" },
+        { text: "Great, would be good to have you there. xx", date: "Sep 17, 2024", type: "received" },
+        { text: "Yeah, I’ll be there. See you then.", date: "Sep 17, 2024", type: "sent" },
+        { text: "See you. xx", date: "Sep 17, 2024", type: "received" }
+    ],
+    'Mum': [
+        { text: "Hey, when are you coming home?", date: "Sep 16, 2024", type: "sent" },
+        { text: "Around 6. Why?", date: "Sep 16, 2024", type: "received" },
+        { text: "Can you stop by the store and pick up some snacks? We’re out of chips.", date: "Sep 16, 2024", type: "sent" },
+        { text: "Sure, anything else?", date: "Sep 16, 2024", type: "received" },
+        { text: "Maybe some soda too? Thanks!", date: "Sep 16, 2024", type: "sent" },
+        { text: "Alright, chips and soda it is. See you soon.", date: "Sep 16, 2024", type: "received" },
+        { text: "You’re the best, thanks Mom!", date: "Sep 16, 2024", type: "sent" },
+        { text: "Mom, do you know where my blue sweater is?", date: "Sep 17, 2024", type: "sent" },
+        { text: "Did you check the laundry basket?", date: "Sep 17, 2024", type: "received" },
+        { text: "Yeah, not there.", date: "Sep 17, 2024", type: "sent" },
+        { text: "Maybe it’s in your closet, behind all those jackets.", date: "Sep 17, 2024", type: "received" },
+        { text: "I already looked! I can’t find it anywhere.", date: "Sep 17, 2024", type: "sent" },
+        { text: "Well, you did borrow it last week for that party. Did you leave it at a friend's place?", date: "Sep 17, 2024", type: "received" },
+        { text: "Oh, wait... maybe! I think I left it at Jessica’s.", date: "Sep 17, 2024", type: "sent" },
+        { text: "Might be worth checking with her before tearing apart the house. 😄", date: "Sep 17, 2024", type: "received" },
+        { text: "Yeah, I’ll text her. Thanks, Mom!", date: "Sep 17, 2024", type: "sent" }
+    ]
+};
+
+            const messages = conversations[contactName] || [];
+            messages.forEach(msg => {
+                const messageDate = document.createElement('div');
+                messageDate.className = 'message-date';
+                messageDate.textContent = msg.date;
+                messagesContainer.appendChild(messageDate);
+
+                const message = document.createElement('div');
+                message.className = `message ${msg.type}`;
+                message.textContent = msg.text;
+                messagesContainer.appendChild(message);
+            });
+        }
+
+        // Go Back to Home Screen
+        function goBackToHome() {
+            document.getElementById('chat-screen').style.display = 'none';
+            document.getElementById('home-screen').style.display = 'flex';
+        }
+    </script>
+</body>
+</html>
